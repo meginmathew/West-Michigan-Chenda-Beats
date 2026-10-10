@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chenda Team</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EDF0EA; --panel:#FAFBF8; --ink:#17231F; --muted:#5B6A64; --line:#CBD3CC;
+  --green:#1D4A3E; --green-ink:#FFFFFF; --gold:#E3A008; --danger:#9B2C2C; --ok:#1D6B45;
+  --sans:"Bricolage Grotesque","Helvetica Neue",Arial,sans-serif;
+  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{ --bg:#101916; --panel:#18231F; --ink:#E8EFEA; --muted:#97A8A0; --line:#2F403A;
+    --green:#7FC8AE; --green-ink:#0E1A16; --danger:#F08A8A; --ok:#7FD7A5; }
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.45;
+  padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 96px)}
+main{max-width:640px;margin:0 auto}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}
+h1{font-size:24px;line-height:1.1;font-weight:800;margin:0;letter-spacing:-.02em}
+header p{margin:2px 0 0;color:var(--muted);font-size:13px}
+#pill{font:inherit;font-size:13px;padding:7px 11px;border:1px solid var(--line);border-radius:99px;white-space:nowrap;background:var(--panel);cursor:pointer;color:var(--ink)}
+#pill::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--gold);margin-right:7px}
+#pill.ok::before{background:var(--ok)} #pill.bad::before{background:var(--danger)}
+section,.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
+h2{font-size:17px;margin:0 0 12px;font-weight:600}
+label,.lbl{display:block;font-size:14px;font-weight:600;margin:0 0 6px}
+.field{margin-bottom:14px}.field:last-child{margin-bottom:0}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+input[type=date],input[type=time],input[type=text],input[type=url],select,textarea{
+  width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:10px 11px;min-height:44px}
+textarea{resize:vertical;min-height:70px}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:14px}
+.seg button{font:inherit;font-weight:600;font-size:14px;padding:11px 6px;border:0;background:var(--bg);color:var(--ink);cursor:pointer;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed=true]{background:var(--green);color:var(--green-ink)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:inherit;font-size:15px;padding:8px 13px;min-height:40px;border-radius:99px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.chip[aria-pressed=true]{background:var(--green);border-color:var(--green);color:var(--green-ink);font-weight:600}
+.chip.add{border-style:dashed;color:var(--muted)}
+.count{font-weight:400;color:var(--muted);margin-left:6px}
+.tools{display:flex;gap:14px;margin-top:10px;font-size:14px;flex-wrap:wrap}
+.link{background:none;border:0;padding:0;font:inherit;color:var(--green);text-decoration:underline;cursor:pointer}
+.link.del{color:var(--danger);font-size:13px}
+.member-role{color:var(--muted);font-size:13px}
+.member-actions{display:flex;justify-content:flex-end;gap:14px;grid-column:1/-1}
+.member-note{margin:0 0 14px;color:var(--muted);font-size:14px}
+.check{display:flex;align-items:center;gap:10px;font-weight:400;font-size:15px;margin:0}
+.check input{width:20px;height:20px;accent-color:var(--green)}
+.preview{font-family:var(--serif);font-size:15.5px;line-height:1.5;border-left:4px solid var(--gold);padding:4px 0 4px 14px;margin:0 0 14px}
+.preview b{display:block;font-family:var(--sans);font-size:13px;font-weight:600;color:var(--muted);margin-top:8px}
+.preview b:first-child{margin-top:0}
+.save{width:100%;font:inherit;font-size:17px;font-weight:600;padding:15px;border:0;border-radius:11px;background:var(--green);color:var(--green-ink);cursor:pointer}
+.save:disabled{opacity:.5;cursor:not-allowed}
+.msg{margin:10px 0 0;font-size:14px;min-height:20px}.msg.err{color:var(--danger)}.msg.ok{color:var(--ok)}
+.hero{background:var(--green);color:var(--green-ink);border-color:var(--green);padding:22px 20px}
+.hero .k{font-size:14px;opacity:.85}
+.hero .n{font-family:var(--serif);font-size:48px;line-height:1.1;font-weight:600;margin:4px 0 14px;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.hero .n.neg{color:#FFC9C9}
+.hero .io{display:grid;grid-template-columns:1fr 1fr;gap:10px;border-top:1px solid rgba(255,255,255,.3);padding-top:12px;font-size:14px}
+.hero .io b{display:block;font-size:19px;font-variant-numeric:tabular-nums}
+.rows{list-style:none;margin:0;padding:0}
+.rows li{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:11px 0;border-top:1px solid var(--line);font-size:15px}
+.rows li:first-child{border-top:0}
+.rows .a{font-variant-numeric:tabular-nums;font-weight:600;text-align:right}
+.rows .a.in{color:var(--ok)}
+.rows .s{grid-column:1/-1;color:var(--muted);font-size:13px}
+.rows .x{grid-column:1/-1;text-align:right}
+.empty{color:var(--muted);font-size:14px;margin:0}
+.tag{font-size:12px;padding:2px 8px;border-radius:99px;border:1px solid var(--danger);color:var(--danger);margin-left:6px;font-weight:400}
+details summary{cursor:pointer;font-weight:600}
+details p,details ol{font-size:14px;color:var(--muted)}
+pre{background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:12px;overflow-x:auto;font-size:12px;max-height:260px}
+.hide{display:none!important}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);
+  padding:6px 8px calc(env(safe-area-inset-bottom,0px) + 6px)}
+nav button{font:inherit;font-size:13px;font-weight:600;background:none;border:0;color:var(--muted);padding:10px 4px;cursor:pointer;border-radius:10px;border-top:3px solid transparent}
+nav button[aria-current=page]{color:var(--green);border-top-color:var(--gold)}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--ink);font-family:var(--sans);padding:18px;max-width:340px;width:calc(100% - 32px)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+dialog .actions{display:flex;gap:10px;margin-top:14px}
+dialog .actions button{flex:1;font:inherit;padding:11px;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+dialog .actions button.go{background:var(--green);color:var(--green-ink);border-color:var(--green);font-weight:600}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <div><h1>Chenda Team</h1><p>Grand Rapids</p></div>
+  <button id="pill" type="button">Set up</button>
+</header>
+
+<!-- BALANCE -->
+<div id="v-bal">
+  <div class="card hero">
+    <div class="k">Cash on hand</div>
+    <div class="n" id="bal">$0.00</div>
+    <div class="io"><div>Money in<b id="tin">$0.00</b></div><div>Money out<b id="tout">$0.00</b></div></div>
+  </div>
+  <section><h2>Where it went</h2><ul class="rows" id="breakdown"></ul></section>
+  <section><h2>Paid by members</h2><ul class="rows" id="paidBy"></ul></section>
+  <section><h2>Recent activity</h2><ul class="rows" id="recent"></ul></section>
+  <div class="tools"><button class="link" id="toSetup" type="button">Connection settings</button><button class="link hide" id="openSheet" type="button">Open Google Sheet</button></div>
+</div>
+
+<!-- PRACTICE -->
+<div id="v-prac" class="hide">
+  <form id="pform" autocomplete="off">
+  <section>
+    <div class="seg" id="pStatus" role="group" aria-label="Session type">
+      <button type="button" data-v="practice" aria-pressed="true">Practice</button>
+      <button type="button" data-v="canceled" aria-pressed="false">Canceled</button>
+      <button type="button" data-v="noclass" aria-pressed="false">No class</button>
+    </div>
+    <div class="field"><label for="date">Date</label><input type="date" id="date" required></div>
+    <div class="field two">
+      <div><label for="start">Start</label><input type="time" id="start" value="19:30"></div>
+      <div><label for="end">End</label><input type="time" id="end" value="21:00"></div>
+    </div>
+    <div class="field hide" id="reasonWrap"><label for="reason">Reason (optional)</label><input type="text" id="reason" placeholder="Meeting with Prasood Ashaan"></div>
+  </section>
+  <section id="practiceOnly">
+    <div class="field"><label for="loc">Location</label><select id="loc"></select></div>
+    <div class="field hide" id="locOtherWrap"><label for="locOther">Other location</label><input type="text" id="locOther" placeholder="Name: street address"></div>
+    <div class="field">
+      <span class="lbl">Who came<span class="count" id="cnt"></span></span>
+      <div class="chips" id="members"></div>
+      <div class="chips hide" id="oldMembers" style="margin-top:8px"></div>
+      <div class="tools"><button type="button" class="link" id="toggleOld">Earlier members</button><button type="button" class="link" id="clearAll">Clear</button></div>
+    </div>
+    <div class="field"><span class="lbl">Ellathalam members</span><div class="chips" id="ell"></div></div>
+    <div class="field"><label class="check"><input type="checkbox" id="benny"> Benny Chettan joined</label></div>
+    <div class="field"><label class="check"><input type="checkbox" id="extra"> Additional session</label></div>
+    <div class="field"><label for="notes">Notes (optional)</label><textarea id="notes" placeholder="per poll, Zoom link, etc."></textarea></div>
+  </section>
+  <section>
+    <h2>Row that will be saved</h2>
+    <p class="preview" id="preview"></p>
+    <button class="save" id="psave" type="submit">Save practice</button>
+    <p class="msg" id="pmsg" role="status"></p>
+  </section>
+  </form>
+  <section><h2>Recent practices</h2><ul class="rows" id="pList"></ul></section>
+  <section><details><summary>Practices attended</summary><ul class="rows" id="attend" style="margin-top:10px"></ul></details></section>
+</div>
+
+<!-- MONEY IN -->
+<div id="v-in" class="hide">
+  <div class="seg" id="inSeg"></div>
+  <section><form id="inForm" autocomplete="off"></form></section>
+  <section><h2 id="inTitle">History</h2><ul class="rows" id="inList"></ul></section>
+</div>
+
+<!-- MONEY OUT -->
+<div id="v-out" class="hide">
+  <div class="seg" id="outSeg"></div>
+  <section><form id="outForm" autocomplete="off"></form></section>
+  <section><h2 id="outTitle">History</h2><ul class="rows" id="outList"></ul></section>
+</div>
+
+<!-- MEMBERS -->
+<div id="v-team" class="hide">
+  <section>
+    <h2 id="memberFormTitle">Add team member</h2>
+    <p class="member-note">Manage the names and roles used in Practice and Money in.</p>
+    <form id="memberForm" autocomplete="off">
+      <input type="hidden" id="memberEditIndex" value="">
+      <div class="field"><label for="memberName">Name</label><input type="text" id="memberName" required placeholder="Member name"></div>
+      <div class="field"><label for="memberRole">Role</label><input type="text" id="memberRole" list="roleOptions" required placeholder="Member"></div>
+      <datalist id="roleOptions"><option value="Leader"><option value="Coordinator"><option value="Secretary"><option value="Treasurer"><option value="Member"><option value="Ellathalam"></datalist>
+      <button class="save" id="memberSave" type="submit">Add member</button>
+      <div class="tools hide" id="memberCancelWrap"><button class="link" id="memberCancel" type="button">Cancel editing</button></div>
+      <p class="msg" id="memberMsg" role="status"></p>
+    </form>
+  </section>
+  <section>
+    <h2>Current members <span class="count" id="memberCount"></span></h2>
+    <ul class="rows" id="memberList"></ul>
+  </section>
+</div>
+
+<!-- SETUP -->
+<div id="v-setup" class="hide">
+  <section>
+    <h2>Connect your Google Drive</h2>
+    <p class="empty" style="margin-bottom:10px">Your Google Sheet is only the database. Everything is entered and read here.</p>
+    <ol class="empty" style="padding-left:20px">
+      <li>Go to script.google.com and create a new project.</li>
+      <li>Replace the code with the script below, set SECRET to any word, and save.</li>
+      <li>Deploy, New deployment, type Web app. Run as: Me. Who has access: Anyone.</li>
+      <li>Approve permissions, copy the Web app URL, and paste it below.</li>
+      <li>After changing the script later, use Deploy, Manage deployments, then a new version.</li>
+    </ol>
+    <div class="tools" style="margin-bottom:8px"><button type="button" class="link" id="copyGs">Copy script</button></div>
+    <pre id="gsView"></pre>
+    <div class="field" style="margin-top:12px"><label for="url">Web app URL</label><input type="url" id="url" placeholder="https://script.google.com/macros/s/.../exec"></div>
+    <div class="field"><label for="key">Secret key (same as SECRET in the script)</label><input type="text" id="key" placeholder="pick any word"></div>
+    <button type="button" class="save" id="saveCfg">Save and test connection</button>
+    <p class="msg" id="smsg" role="status"></p>
+  </section>
+</div>
+</main>
+
+<nav id="nav">
+  <button data-v="bal" aria-current="page">Balance</button>
+  <button data-v="prac">Practice</button>
+  <button data-v="team">Members</button>
+  <button data-v="in">Money in</button>
+  <button data-v="out">Money out</button>
+</nav>
+
+<dialog id="dlg"><form method="dialog">
+  <label for="newName">New member name</label><input type="text" id="newName">
+  <div class="actions"><button value="cancel">Cancel</button><button class="go" value="ok">Add</button></div>
+</form></dialog>
+
+<script type="text/plain" id="gs">
+// Chenda Team backend: stores everything in one Google Sheet in your Drive.
+// The sheet (with all tabs) is created automatically on first use.
+const SECRET = 'chenda-melam';   // must match the Secret key in the app
+const FILE_NAME = 'Grand Rapids Chenda Team - Data';
+
+function money_(who, what) {
+  return [['Date','date'],[who,'who'],['Amount','amount'],[what,'what'],['Method','method'],['Note','note'],['Logged at','loggedAt'],['Entry ID','id']];
+}
+const TABS = {
+  practice: { name: 'Practice', dateCol: 4, cols: [['Practice Date & Time','when'],['Location','location'],['Attendance','attendance'],['Date (ISO)','dateISO'],['Status','status'],['Headcount','count'],['Logged at','loggedAt'],['Entry ID','id']] },
+  payment:  { name: 'Payment', dateCol: 1, amtCol: 3, cols: money_('Member','For') },
+  pastpay:  { name: 'Past Member Payment', dateCol: 1, amtCol: 3, cols: money_('Past member','For') },
+  benny:    { name: 'Benny Ashan', dateCol: 1, amtCol: 3, cols: money_('Paid to','For') },
+  expense:  { name: 'Expense', dateCol: 1, amtCol: 3, cols: money_('Payee','Category') },
+  venue:    { name: 'Temple-Venue Expense', dateCol: 1, amtCol: 3, cols: money_('Venue','Purpose') }
+};
+
+function ss_() {
+  const props = PropertiesService.getScriptProperties();
+  const id = props.getProperty('SHEET_ID');
+  if (id) return SpreadsheetApp.openById(id);
+  const ss = SpreadsheetApp.create(FILE_NAME);
+  props.setProperty('SHEET_ID', ss.getId());
+  Object.keys(TABS).forEach(function (k) {
+    const t = TABS[k];
+    let sh;
+    const all = ss.getSheets();
+    if (all.length === 1 && /^Sheet\d*$/.test(all[0].getName())) { sh = all[0]; sh.setName(t.name); }
+    else sh = ss.insertSheet(t.name);
+    sh.appendRow(t.cols.map(function (c) { return c[0]; }));
+    sh.setFrozenRows(1);
+    sh.getRange(1, 1, 1, t.cols.length).setFontWeight('bold');
+    sh.getRange(1, t.dateCol, sh.getMaxRows(), 1).setNumberFormat('@');
+    if (t.amtCol) sh.getRange(2, t.amtCol, sh.getMaxRows() - 1, 1).setNumberFormat('$#,##0.00');
+    sh.setColumnWidth(t.cols.length, 120);
+  });
+  const b = ss.insertSheet('Balance', 0);
+  b.getRange('A1:B1').setValues([['Cash on hand', "=B3-B4"]]);
+  b.getRange('A3:B7').setFormulas([
+    ['Money in', "=B8+B9"], ['Money out', "=B10+B11+B12"],
+    ['', ''], ['', ''], ['', '']]);
+  b.getRange('A8:B12').setValues([
+    ['Member payments', "=SUM(Payment!C2:C)"],
+    ['Past member payments', "=SUM('Past Member Payment'!C2:C)"],
+    ['Benny Ashan', "=SUM('Benny Ashan'!C2:C)"],
+    ['Expenses', "=SUM(Expense!C2:C)"],
+    ['Temple/Venue', "=SUM('Temple-Venue Expense'!C2:C)"]]);
+  b.getRange('B1:B12').setNumberFormat('$#,##0.00');
+  b.getRange('A1:B1').setFontWeight('bold').setFontSize(14);
+  b.setColumnWidth(1, 200); b.setColumnWidth(2, 120);
+  return ss;
+}
+
+function json_(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
+
+function read_(ss, k) {
+  const t = TABS[k], sh = ss.getSheetByName(t.name);
+  if (!sh || sh.getLastRow() < 2) return [];
+  const tz = ss.getSpreadsheetTimeZone();
+  const vals = sh.getRange(2, 1, sh.getLastRow() - 1, t.cols.length).getValues();
+  const out = [];
+  vals.forEach(function (row) {
+    const o = {};
+    t.cols.forEach(function (c, i) {
+      let v = row[i];
+      if (v instanceof Date) v = Utilities.formatDate(v, tz, c[1] === 'loggedAt' ? "yyyy-MM-dd'T'HH:mm:ss" : 'yyyy-MM-dd');
+      o[c[1]] = v;
+    });
+    if (o.id) out.push(o);
+  });
+  return out;
+}
+
+function doGet(e) {
+  if (!e.parameter || e.parameter.key !== SECRET) return json_({ ok: false, error: 'Wrong secret key' });
+  const ss = ss_(), data = {};
+  Object.keys(TABS).forEach(function (k) { data[k] = read_(ss, k); });
+  return json_({ ok: true, data: data, sheetUrl: ss.getUrl() });
+}
+
+function doPost(e) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    const d = JSON.parse(e.postData.contents);
+    if (d.key !== SECRET) return json_({ ok: false, error: 'Wrong secret key' });
+    const t = TABS[d.type];
+    if (!t) return json_({ ok: false, error: 'Unknown type' });
+    const ss = ss_(), sh = ss.getSheetByName(t.name);
+    const idCol = t.cols.length;
+    const last = sh.getLastRow();
+    const ids = last > 1 ? sh.getRange(2, idCol, last - 1, 1).getValues().map(function (r) { return String(r[0]); }) : [];
+    if (d.action === 'add') {
+      if (ids.indexOf(String(d.row.id)) === -1) {
+        sh.appendRow(t.cols.map(function (c) {
+          if (c[1] === 'loggedAt') return new Date();
+          const v = d.row[c[1]];
+          return v === undefined || v === null ? '' : v;
+        }));
+      }
+    } else if (d.action === 'delete') {
+      const i = ids.indexOf(String(d.id));
+      if (i > -1) sh.deleteRow(i + 2);
+    } else return json_({ ok: false, error: 'Unknown action' });
+    return json_({ ok: true });
+  } catch (err) {
+    return json_({ ok: false, error: String(err) });
+  } finally {
+    lock.releaseLock();
+  }
+}
+</script>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const money = n => (n||0).toLocaleString('en-US',{style:'currency',currency:'USD'});
+  const GS = $('gs').textContent.trim();
+
+  // ---------- reference data ----------
+  const ACTIVE = ["Priya","Krishnan","Shiju","Liju","Beena","Linta","Nima","Rijeesh","Prince","Megin","Sundar","Dony","Rakhith","Noel","Ruben","Sheeba"];
+  const OLD = ["Binu","Joby","Mahesh","Rajesh","Dhanya"];
+  const ELL = ["Sheeba","Treesa","Noel","Ruben"];
+  const HOSTS = ["Krishnan: 4685 Thornberry Hill Ct NE","Krishnan & Priya Home","Liju & Beena Home","Shiju: 1785 Springwind Dr SW","Rakhith: 6254 Vickery Hill Ct SE","Sundar: 1171 Cobblestone way Dr SE","Dony: 4855 E. Meadows Court SE","Prince: 7215 Thornapple Hollow Dr SE","Mahesh: 3315 Falcon Ridge CT NE","West Michigan Hindu Temple","Zoom"];
+  const METHODS = ["Cash","Zelle","Venmo","Check","Other"];
+  const TYPES = {
+    payment:{label:'Member payment', short:'Member', dir:'in', who:{mode:'member',label:'Member'}, what:{label:'For',opts:['Monthly dues','Instrument fund','Event','Donation']}},
+    pastpay:{label:'Past member payment', short:'Past member', dir:'in', who:{mode:'text',label:'Past member',opts:OLD}, what:{label:'For',opts:['Monthly dues','Instrument fund','Event','Donation']}},
+    benny:{label:'Payment to Benny Ashan', short:'Benny Ashan', dir:'out', who:{mode:'fixed',value:'Benny Ashan'}, what:{label:'For',opts:['Class fee','Travel','Gift']}},
+    expense:{label:'Expense', short:'Expense', dir:'out', who:{mode:'text',label:'Paid to',opts:[]}, what:{label:'Category',opts:['Instruments','Repairs','Supplies','Food','Other']}},
+    venue:{label:'Temple/Venue expense', short:'Temple/Venue', dir:'out', who:{mode:'text',label:'Venue',opts:['West Michigan Hindu Temple']}, what:{label:'Purpose',opts:['Room rental','Event']}}
+  };
+  const MONEY = Object.keys(TYPES);
+  const ALL = ['practice', ...MONEY];
+
+  // ---------- storage ----------
+  const mem = {};
+  const store = {
+    get(k,d){ try{ const v=localStorage.getItem(k); return v==null?d:JSON.parse(v);}catch(e){ return k in mem?mem[k]:d; } },
+    set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){ mem[k]=v; } }
+  };
+  const empty = () => Object.fromEntries(ALL.map(k=>[k,[]]));
+  let data = Object.assign(empty(), store.get('data', {}));
+  let queue = store.get('queue', []);
+  let cfg = store.get('cfg', {url:'https://script.google.com/macros/s/AKfycbzmNyLlAsct-f4weyhsWCrC3POszCjAvFlC91nCoL-5ejcFzj_Bx_iuL7tijUI0xUFN/exec',key:'chenda-melam',sheetUrl:''});
+  const migratedExtras = store.get('extraMembers', []);
+  const defaultMembers = [...ACTIVE, ...migratedExtras.filter(n=>!ACTIVE.includes(n)&&!OLD.includes(n))].map(name=>({name,role:ELL.includes(name)?'Ellathalam':'Member'}));
+  let teamMembers = store.get('teamMembers', defaultMembers);
+  teamMembers = Array.isArray(teamMembers) ? teamMembers.filter(m=>m&&m.name).map(m=>({name:String(m.name).trim(),role:String(m.role||'Member').trim()})) : defaultMembers;
+  store.set('teamMembers',teamMembers);
+  let syncState = '', syncing = false;
+
+  const newId = () => Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  const today = () => { const t=new Date(); return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`; };
+  const fmtDate = iso => { if(!iso) return ''; const [y,m,d]=String(iso).slice(0,10).split('-').map(Number); return new Date(y,m-1,d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); };
+  const members = () => teamMembers.map(m=>m.name);
+  const ellMembers = () => teamMembers.filter(m=>String(m.role).toLowerCase().includes('ellathalam')).map(m=>m.name);
+  function saveMembers(){ store.set('teamMembers',teamMembers); }
+
+  // rows for a type = server data + queued adds - queued deletes
+  function rowsOf(type){
+    const del = new Set(queue.filter(q=>q.action==='delete'&&q.type===type).map(q=>q.id));
+    const seen = new Set(); const out=[];
+    const pending = queue.filter(q=>q.action==='add'&&q.type===type).map(q=>({...q.row,_pending:true}));
+    [...pending, ...(data[type]||[])].forEach(r=>{ if(!del.has(r.id)&&!seen.has(r.id)){ seen.add(r.id); out.push(r);} });
+    const key = r => String(type==='practice'?r.dateISO:r.date)+String(r.loggedAt||r.id);
+    return out.sort((a,b)=>key(b).localeCompare(key(a)));
+  }
+  const total = type => rowsOf(type).reduce((s,r)=>s+(Number(r.amount)||0),0);
+
+  // ---------- sync ----------
+  function setPill(){
+    const p=$('pill'); p.className='';
+    if(!cfg.url){ p.textContent='Set up'; p.classList.add('bad'); }
+    else if(syncing){ p.textContent='Syncing...'; }
+    else if(syncState==='error'){ p.textContent='Sync problem'; p.classList.add('bad'); }
+    else if(queue.length){ p.textContent=`${queue.length} unsent`; p.classList.add('bad'); }
+    else { p.textContent='Synced'; p.classList.add('ok'); }
+    $('openSheet').classList.toggle('hide', !cfg.sheetUrl);
+  }
+  async function post(payload){
+    const body=JSON.stringify({...payload,key:cfg.key});
+    try{
+      const r=await fetch(cfg.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body});
+      const j=await r.json(); if(!j.ok) throw new Error(j.error||'Rejected by script');
+    }catch(e){
+      if(e instanceof TypeError){ await fetch(cfg.url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body}); }
+      else throw e;
+    }
+  }
+  async function flush(){
+    if(!cfg.url||syncing) return;
+    syncing=true; syncState=''; setPill();
+    try{
+      while(queue.length){
+        const q=queue[0];
+        await post(q.action==='add'?{action:'add',type:q.type,row:q.row}:{action:'delete',type:q.type,id:q.id});
+        if(q.action==='add') data[q.type]=[q.row,...(data[q.type]||[]).filter(r=>r.id!==q.row.id)];
+        else data[q.type]=(data[q.type]||[]).filter(r=>r.id!==q.id);
+        queue.shift(); store.set('queue',queue); store.set('data',data);
+      }
+    }catch(e){ syncState='error'; syncing=false; setPill(); renderAll(); return e.message; }
+    syncing=false; setPill(); renderAll();
+  }
+  async function pull(){
+    if(!cfg.url) return 'Not connected';
+    const err=await flush(); if(err) return err;
+    syncing=true; setPill();
+    try{
+      const r=await fetch(`${cfg.url}${cfg.url.includes('?')?'&':'?'}key=${encodeURIComponent(cfg.key)}`);
+      const j=await r.json(); if(!j.ok) throw new Error(j.error||'Could not read the sheet');
+      data=Object.assign(empty(),j.data); store.set('data',data);
+      if(j.sheetUrl){ cfg.sheetUrl=j.sheetUrl; store.set('cfg',cfg); }
+      syncState='';
+    }catch(e){ syncState='error'; syncing=false; setPill(); return e instanceof TypeError ? 'Could not reach the script. Check the Web app URL and that access is set to Anyone.' : e.message; }
+    syncing=false; setPill(); renderAll();
+    return '';
+  }
+  function enqueue(op){ queue.push(op); store.set('queue',queue); setPill(); renderAll(); flush(); }
+  function removeRow(type,id){ if(confirm('Delete this entry? It will also be removed from the Google Sheet.')) enqueue({action:'delete',type,id}); }
+
+  // ---------- navigation ----------
+  const VIEWS=['bal','prac','team','in','out','setup'];
+  function show(v){
+    VIEWS.forEach(x=>$('v-'+x).classList.toggle('hide',x!==v));
+    document.querySelectorAll('#nav button').forEach(b=>{ b.toggleAttribute('aria-current',b.dataset.v===v); if(b.dataset.v===v) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current'); });
+    window.scrollTo(0,0);
+  }
+  document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>show(b.dataset.v));
+  $('pill').onclick=()=>{ if(!cfg.url) show('setup'); else if(syncState==='error'&&!queue.length) show('setup'); else pull(); };
+  $('toSetup').onclick=()=>show('setup');
+  $('openSheet').onclick=()=>window.open(cfg.sheetUrl,'_blank');
+
+  // ---------- balance ----------
+  function listItem(r,type,showType){
+    const t=TYPES[type], isIn=t.dir==='in';
+    return `<li><span>${esc(r.who||t.short)}${r._pending?'<span class="tag">unsent</span>':''}</span><span class="a ${isIn?'in':''}">${isIn?'+':'−'}${money(Number(r.amount)||0)}</span><span class="s">${[fmtDate(r.date),showType?t.short:'',r.what,r.method,r.note].filter(Boolean).map(esc).join(' · ')}</span></li>`;
+  }
+  function renderBalance(){
+    const tin=total('payment')+total('pastpay'), tout=total('benny')+total('expense')+total('venue'), bal=tin-tout;
+    $('bal').textContent=money(bal); $('bal').classList.toggle('neg',bal<0);
+    $('tin').textContent=money(tin); $('tout').textContent=money(tout);
+    $('breakdown').innerHTML=MONEY.map(k=>`<li><span>${TYPES[k].label}</span><span class="a ${TYPES[k].dir==='in'?'in':''}">${TYPES[k].dir==='in'?'+':'−'}${money(total(k))}</span></li>`).join('');
+    const by={};
+    rowsOf('payment').forEach(r=>{ const o=by[r.who]||(by[r.who]={sum:0,last:'',n:0}); o.sum+=Number(r.amount)||0; o.n++; if(String(r.date)>o.last)o.last=String(r.date); });
+    const names=Object.keys(by).sort((a,b)=>by[b].sum-by[a].sum);
+    $('paidBy').innerHTML=names.length?names.map(n=>`<li><span>${esc(n)}</span><span class="a in">${money(by[n].sum)}</span><span class="s">${by[n].n} payment${by[n].n>1?'s':''} · last ${fmtDate(by[n].last)}</span></li>`).join(''):'<li><p class="empty">No member payments yet. Add one under Money in.</p></li>';
+    const rec=MONEY.flatMap(k=>rowsOf(k).map(r=>({r,k}))).sort((a,b)=>(String(b.r.date)+String(b.r.loggedAt||b.r.id)).localeCompare(String(a.r.date)+String(a.r.loggedAt||a.r.id))).slice(0,8);
+    $('recent').innerHTML=rec.length?rec.map(x=>listItem(x.r,x.k,true)).join(''):'<li><p class="empty">Nothing yet.</p></li>';
+  }
+
+  // ---------- money in / out ----------
+  const cur={in:'payment',out:'benny'};
+  function datalist(id,opts){ return `<datalist id="${id}">${[...new Set(opts)].map(o=>`<option value="${esc(o)}">`).join('')}</datalist>`; }
+  function renderMoney(dir){
+    const types=MONEY.filter(k=>TYPES[k].dir===dir), type=cur[dir], t=TYPES[type];
+    $(dir+'Seg').innerHTML=types.map(k=>`<button type="button" data-k="${k}" aria-pressed="${k===type}">${TYPES[k].short}</button>`).join('');
+    $(dir+'Seg').querySelectorAll('button').forEach(b=>b.onclick=()=>{ cur[dir]=b.dataset.k; renderMoney(dir); });
+    const seenWho=[...new Set(rowsOf(type).map(r=>r.who).filter(Boolean))];
+    const seenWhat=[...new Set(rowsOf(type).map(r=>r.what).filter(Boolean))];
+    let whoHtml='';
+    if(t.who.mode==='member') whoHtml=`<div class="field"><label for="f_who">${t.who.label}</label><select id="f_who" required><option value="">Choose...</option>${members().concat(OLD).map(n=>`<option>${esc(n)}</option>`).join('')}</select></div>`;
+    else if(t.who.mode==='text') whoHtml=`<div class="field"><label for="f_who">${t.who.label}</label><input type="text" id="f_who" list="dl_who" required>${datalist('dl_who',[...t.who.opts,...seenWho])}</div>`;
+    $(dir+'Form').innerHTML=`
+      <div class="field two"><div><label for="f_date">Date</label><input type="date" id="f_date" value="${today()}" required></div>
+      <div><label for="f_amt">Amount ($)</label><input type="text" inputmode="decimal" id="f_amt" placeholder="0.00" required></div></div>
+      ${whoHtml}
+      <div class="field"><label for="f_what">${t.what.label}</label><input type="text" id="f_what" list="dl_what">${datalist('dl_what',[...t.what.opts,...seenWhat])}</div>
+      <div class="field"><label for="f_method">Method</label><select id="f_method">${METHODS.map(m=>`<option>${m}</option>`).join('')}</select></div>
+      <div class="field"><label for="f_note">Note (optional)</label><input type="text" id="f_note"></div>
+      <button class="save" type="submit">Save ${dir==='in'?'payment':'expense'}</button><p class="msg" id="${dir}Msg" role="status"></p>`;
+    $(dir+'Form').onsubmit=ev=>{
+      ev.preventDefault();
+      const amt=parseFloat(String($('f_amt').value).replace(/[$,\s]/g,''));
+      if(!(amt>0)){ const m=$(dir+'Msg'); m.textContent='Enter an amount greater than 0.'; m.className='msg err'; return; }
+      const row={id:newId(),date:$('f_date').value,who:t.who.mode==='fixed'?t.who.value:$('f_who').value.trim(),amount:Math.round(amt*100)/100,what:$('f_what').value.trim(),method:$('f_method').value,note:$('f_note').value.trim()};
+      enqueue({action:'add',type,row});
+      renderMoney(dir); const m=$(dir+'Msg'); m.textContent=`Saved ${money(row.amount)}.`; m.className='msg ok';
+    };
+    $(dir+'Title').textContent=`${t.label} history`;
+    const rows=rowsOf(type);
+    $(dir+'List').innerHTML=rows.length?rows.map(r=>listItem(r,type,false).replace('</li>',`<span class="x"><button class="link del" data-id="${esc(r.id)}" type="button">Delete</button></span></li>`)).join(''):'<li><p class="empty">Nothing recorded yet.</p></li>';
+    $(dir+'List').querySelectorAll('.del').forEach(b=>b.onclick=()=>removeRow(type,b.dataset.id));
+  }
+
+  // ---------- practice ----------
+  let pstatus='practice'; const picked=new Set(), pickedEll=new Set();
+  const join=a=>a.length<=1?(a[0]||''):a.length===2?a[0]+' & '+a[1]:a.slice(0,-1).join(', ')+', & '+a[a.length-1];
+  const to12=t=>{const [H,M]=t.split(':').map(Number);return{h:H%12||12,m:String(M).padStart(2,'0'),ap:H>=12?'PM':'AM'};};
+  function range(s,e){ if(!s||!e) return ''; const a=to12(s),b=to12(e); return a.ap===b.ap?`${a.h}:${a.m} to ${b.h}:${b.m} ${b.ap}`:`${a.h}:${a.m} ${a.ap} to ${b.h}:${b.m} ${b.ap}`; }
+  function whenText(){ const v=$('date').value; if(!v) return ''; const [y,m,d]=v.split('-').map(Number); const r=range($('start').value,$('end').value); return `${m}/${d}/${y}`+(r?` from ${r}`:''); }
+  function ploc(){ if(pstatus==='canceled') return 'Canceled'; if(pstatus==='noclass') return 'No Class.'+($('reason').value.trim()?' '+$('reason').value.trim():''); return $('loc').value==='__other'?$('locOther').value.trim():$('loc').value; }
+  function pattend(){
+    if(pstatus==='canceled') return ''; if(pstatus==='noclass') return ploc();
+    let s=join([...picked]); if($('benny').checked) s+=(s?' ':'')+'with Benny Chettan';
+    if(pickedEll.size) s+=` (Ellathalam Members: ${join([...pickedEll])})`;
+    if($('extra').checked) s+=' (Additional Session)';
+    const n=$('notes').value.trim(); if(n) s+=(s?' ':'')+`(${n})`; return s;
+  }
+  function chip(name,set){
+    const b=document.createElement('button'); b.type='button'; b.className='chip'; b.textContent=name; b.setAttribute('aria-pressed',set.has(name));
+    b.onclick=()=>{ set.has(name)?set.delete(name):set.add(name); b.setAttribute('aria-pressed',set.has(name)); pupdate(); }; return b;
+  }
+  function renderChips(){
+    const m=$('members'); m.innerHTML=''; members().forEach(n=>m.appendChild(chip(n,picked)));
+    const add=document.createElement('button'); add.type='button'; add.className='chip add'; add.textContent='+ Add'; add.onclick=()=>{ $('newName').value=''; $('dlg').showModal(); $('newName').focus(); }; m.appendChild(add);
+    const o=$('oldMembers'); o.innerHTML=''; OLD.forEach(n=>o.appendChild(chip(n,picked)));
+    const e=$('ell'); e.innerHTML=''; ellMembers().forEach(n=>e.appendChild(chip(n,pickedEll)));
+  }
+  function pupdate(){
+    $('cnt').textContent=picked.size?`(${picked.size})`:'';
+    const w=whenText(),l=ploc(),a=pattend();
+    $('preview').innerHTML=`<b>Practice Date &amp; Time</b>${esc(w)||'—'}<b>Location</b>${esc(l)||'—'}<b>Attendance</b>${esc(a)||'—'}`;
+    $('psave').disabled=!(w&&(pstatus!=='practice'||(l&&picked.size)));
+  }
+  HOSTS.forEach(h=>{const o=document.createElement('option');o.value=h;o.textContent=h;$('loc').appendChild(o);});
+  {const o=document.createElement('option');o.value='__other';o.textContent='Other...';$('loc').appendChild(o);}
+  $('loc').onchange=()=>{ $('locOtherWrap').classList.toggle('hide',$('loc').value!=='__other'); pupdate(); };
+  $('pStatus').querySelectorAll('button').forEach(b=>b.onclick=()=>{
+    pstatus=b.dataset.v; $('pStatus').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));
+    $('practiceOnly').classList.toggle('hide',pstatus!=='practice'); $('reasonWrap').classList.toggle('hide',pstatus!=='noclass'); pupdate();
+  });
+  $('toggleOld').onclick=()=>$('oldMembers').classList.toggle('hide');
+  $('clearAll').onclick=()=>{ picked.clear(); renderChips(); pupdate(); };
+  $('dlg').addEventListener('close',()=>{
+    if($('dlg').returnValue!=='ok') return; const n=$('newName').value.trim().replace(/\s+/g,' '); if(!n) return;
+    const name=n.charAt(0).toUpperCase()+n.slice(1);
+    if(!members().some(x=>x.toLowerCase()===name.toLowerCase())&&!OLD.some(x=>x.toLowerCase()===name.toLowerCase())){
+      teamMembers.push({name,role:'Member'}); saveMembers();
+    }
+    picked.add(name); renderMembers(); renderChips(); renderMoney('in'); pupdate();
+  });
+  ['date','start','end','reason','locOther','notes','benny','extra'].forEach(id=>$(id).addEventListener('input',pupdate));
+  $('date').value=today();
+  $('pform').addEventListener('submit',ev=>{
+    ev.preventDefault();
+    const row={id:newId(),dateISO:$('date').value,when:whenText(),location:ploc(),attendance:pattend(),status:pstatus,count:pstatus==='practice'?picked.size:0};
+    enqueue({action:'add',type:'practice',row});
+    if(pstatus==='practice'){ picked.clear(); pickedEll.clear(); $('benny').checked=false; $('extra').checked=false; $('notes').value=''; renderChips(); }
+    pupdate(); const m=$('pmsg'); m.textContent='Saved.'; m.className='msg ok';
+  });
+  function renderPractice(){
+    const rows=rowsOf('practice');
+    $('pList').innerHTML=rows.length?rows.slice(0,25).map(r=>`<li><span>${esc(r.when)}${r._pending?'<span class="tag">unsent</span>':''}</span><span class="a">${r.status==='practice'?r.count+' came':esc(r.status==='canceled'?'Canceled':'No class')}</span><span class="s">${esc(r.location)}${r.attendance&&r.status==='practice'?' · '+esc(r.attendance):''}</span><span class="x"><button class="link del" data-id="${esc(r.id)}" type="button">Delete</button></span></li>`).join(''):'<li><p class="empty">No practices logged yet.</p></li>';
+    $('pList').querySelectorAll('.del').forEach(b=>b.onclick=()=>removeRow('practice',b.dataset.id));
+    const names=[...members(),...OLD], counts={}; const held=rows.filter(r=>r.status==='practice');
+    names.forEach(n=>{ const re=new RegExp('\\b'+n.replace(/[.*+?^${}()|[\]\\]/g,'\\\\$&')+'\\b'); const c=held.filter(r=>re.test(r.attendance||'')).length; if(c) counts[n]=c; });
+    const ks=Object.keys(counts).sort((a,b)=>counts[b]-counts[a]);
+    $('attend').innerHTML=ks.length?ks.map(n=>`<li><span>${esc(n)}</span><span class="a">${counts[n]} of ${held.length}</span></li>`).join(''):'<li><p class="empty">Attendance counts appear after you log practices.</p></li>';
+  }
+
+  // ---------- members ----------
+  function resetMemberForm(){
+    $('memberEditIndex').value=''; $('memberName').value=''; $('memberRole').value='Member';
+    $('memberFormTitle').textContent='Add team member'; $('memberSave').textContent='Add member';
+    $('memberCancelWrap').classList.add('hide'); $('memberMsg').textContent=''; $('memberMsg').className='msg';
+  }
+  function refreshMemberUses(){
+    const valid=new Set(members());
+    [...picked].forEach(n=>{ if(!valid.has(n)) picked.delete(n); });
+    [...pickedEll].forEach(n=>{ if(!ellMembers().includes(n)) pickedEll.delete(n); });
+    renderChips(); renderMoney('in'); renderPractice(); pupdate();
+  }
+  function renderMembers(){
+    $('memberCount').textContent=`(${teamMembers.length})`;
+    $('memberList').innerHTML=teamMembers.length?teamMembers.map((m,i)=>`<li><span>${esc(m.name)}</span><span class="member-role">${esc(m.role||'Member')}</span><span class="member-actions"><button class="link edit-member" data-i="${i}" type="button">Edit</button><button class="link del delete-member" data-i="${i}" type="button">Delete</button></span></li>`).join(''):'<li><p class="empty">No members yet.</p></li>';
+    $('memberList').querySelectorAll('.edit-member').forEach(b=>b.onclick=()=>{
+      const i=Number(b.dataset.i),m=teamMembers[i]; $('memberEditIndex').value=String(i); $('memberName').value=m.name; $('memberRole').value=m.role||'Member';
+      $('memberFormTitle').textContent='Update team member'; $('memberSave').textContent='Save changes'; $('memberCancelWrap').classList.remove('hide');
+      $('memberName').focus(); window.scrollTo(0,0);
+    });
+    $('memberList').querySelectorAll('.delete-member').forEach(b=>b.onclick=()=>{
+      const i=Number(b.dataset.i),m=teamMembers[i]; if(!confirm(`Delete ${m.name} from the team?`)) return;
+      teamMembers.splice(i,1); saveMembers(); resetMemberForm(); renderMembers(); refreshMemberUses();
+    });
+  }
+  $('memberForm').onsubmit=ev=>{
+    ev.preventDefault(); const name=$('memberName').value.trim().replace(/\s+/g,' '),role=$('memberRole').value.trim().replace(/\s+/g,' ')||'Member';
+    const edit=$('memberEditIndex').value,duplicate=teamMembers.findIndex((m,i)=>m.name.toLowerCase()===name.toLowerCase()&&(edit===''||i!==Number(edit)));
+    if(!name){ $('memberMsg').textContent='Enter a member name.'; $('memberMsg').className='msg err'; return; }
+    if(duplicate>-1){ $('memberMsg').textContent='That member already exists.'; $('memberMsg').className='msg err'; return; }
+    if(edit==='') teamMembers.push({name,role}); else teamMembers[Number(edit)]={name,role};
+    saveMembers(); resetMemberForm(); renderMembers(); refreshMemberUses();
+    $('memberMsg').textContent=edit===''?'Member added.':'Member updated.'; $('memberMsg').className='msg ok';
+  };
+  $('memberCancel').onclick=resetMemberForm;
+
+  // ---------- setup ----------
+  $('gsView').textContent=GS;
+  $('url').value=cfg.url||''; $('key').value=cfg.key||'';
+  $('copyGs').onclick=async()=>{ try{ await navigator.clipboard.writeText(GS); $('copyGs').textContent='Copied'; }catch(e){ const r=document.createRange(); r.selectNodeContents($('gsView')); getSelection().removeAllRanges(); getSelection().addRange(r); $('copyGs').textContent='Selected. Press copy.'; } };
+  $('saveCfg').onclick=async()=>{
+    cfg={...cfg,url:$('url').value.trim(),key:$('key').value.trim()}; store.set('cfg',cfg);
+    const m=$('smsg'); m.className='msg'; m.textContent='Testing...';
+    const err=await pull();
+    if(err){ m.textContent=err; m.className='msg err'; }
+    else { m.textContent='Connected. Your Google Sheet is ready.'; m.className='msg ok'; setTimeout(()=>show('bal'),900); }
+  };
+
+  function renderAll(){ renderBalance(); renderPractice(); renderMembers(); renderMoney('in'); renderMoney('out'); setPill(); }
+  resetMemberForm(); renderChips(); pupdate(); renderAll();
+  if(!cfg.url) show('setup'); else pull();
+})();
+</script>
+</body>
+</html>
