@@ -46,11 +46,15 @@ textarea{resize:vertical;min-height:70px}
 .chip{font:inherit;font-size:15px;padding:8px 13px;min-height:40px;border-radius:99px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
 .chip[aria-pressed=true]{background:var(--green);border-color:var(--green);color:var(--green-ink);font-weight:600}
 .chip.add{border-style:dashed;color:var(--muted)}
+.role-group{flex:1 0 100%;display:grid;gap:6px}
+.role-heading{font-size:12px;color:var(--muted);font-weight:600}
+.role-options{display:flex;flex-wrap:wrap;gap:8px}
 .count{font-weight:400;color:var(--muted);margin-left:6px}
 .tools{display:flex;gap:14px;margin-top:10px;font-size:14px;flex-wrap:wrap}
 .link{background:none;border:0;padding:0;font:inherit;color:var(--green);text-decoration:underline;cursor:pointer}
 .link.del{color:var(--danger);font-size:13px}
 .member-role{color:var(--muted);font-size:13px}
+.member-instrument{grid-column:1/-1;color:var(--muted);font-size:13px}
 .member-actions{display:flex;justify-content:flex-end;gap:14px;grid-column:1/-1}
 .member-note{margin:0 0 14px;color:var(--muted);font-size:14px}
 .check{display:flex;align-items:center;gap:10px;font-weight:400;font-size:15px;margin:0}
@@ -165,7 +169,6 @@ dialog .actions button.go{background:var(--green);color:var(--green-ink);border-
       <div class="chips hide" id="oldMembers" style="margin-top:8px"></div>
       <div class="tools"><button type="button" class="link" id="toggleOld">Earlier members</button><button type="button" class="link" id="clearAll">Clear</button></div>
     </div>
-    <div class="field"><span class="lbl">Ellathalam members</span><div class="chips" id="ell"></div></div>
     <div class="field"><label class="check"><input type="checkbox" id="benny"> Benny Chettan joined</label></div>
     <div class="field"><label class="check"><input type="checkbox" id="extra"> Additional session</label></div>
     <div class="field"><label for="notes">Notes (optional)</label><textarea id="notes" placeholder="per poll, Zoom link, etc."></textarea></div>
@@ -199,19 +202,20 @@ dialog .actions button.go{background:var(--green);color:var(--green-ink);border-
 <div id="v-team" class="hide">
   <section>
     <h2 id="memberFormTitle">Add team member</h2>
-    <p class="member-note">Manage the names and roles used in Practice and Money in.</p>
+    <p class="member-note">Manage the names, roles, and current or former status used in Practice and Money in.</p>
     <form id="memberForm" autocomplete="off">
       <input type="hidden" id="memberEditIndex" value="">
       <div class="field"><label for="memberName">Name</label><input type="text" id="memberName" required placeholder="Member name"></div>
-      <div class="field"><label for="memberRole">Role</label><input type="text" id="memberRole" list="roleOptions" required placeholder="Member"></div>
-      <datalist id="roleOptions"><option value="Leader"><option value="Coordinator"><option value="Secretary"><option value="Treasurer"><option value="Member"><option value="Ellathalam"></datalist>
+      <div class="field"><label for="memberRole">Role</label><select id="memberRole" required><option value="Chenda">Chenda</option><option value="Veekan">Veekan</option><option value="Ellathalam">Ellathalam</option></select></div>
+      <div class="field"><label for="memberStatus">Membership status</label><select id="memberStatus"><option value="Current">Current</option><option value="Former">Former</option></select></div>
+      <div class="field"><label for="instrumentName">Instrument name (optional)</label><input type="text" id="instrumentName" placeholder="e.g. Chenda"></div>
       <button class="save" id="memberSave" type="submit">Add member</button>
       <div class="tools hide" id="memberCancelWrap"><button class="link" id="memberCancel" type="button">Cancel editing</button></div>
       <p class="msg" id="memberMsg" role="status"></p>
     </form>
   </section>
   <section>
-    <h2>Current members <span class="count" id="memberCount"></span></h2>
+    <h2>Team roster <span class="count" id="memberCount"></span></h2>
     <ul class="rows" id="memberList"></ul>
   </section>
 </div>
@@ -373,10 +377,10 @@ function doPost(e) {
   const GS = $('gs').textContent.trim();
 
   // ---------- reference data ----------
-  const ACTIVE = ["Priya","Krishnan","Shiju","Liju","Beena","Linta","Nima","Rijeesh","Prince","Megin","Sundar","Dony","Rakhith","Noel","Ruben","Sheeba"];
+  const ACTIVE = ["Priya","Krishnan","Shiju","Liju","Beena L","Linta","Nima","Rijeesh","Prince","Megin","Sundar","Dony","Noel","Sheeba V","Sheeba E","Beena C"];
   const OLD = ["Binu","Joby","Mahesh","Rajesh","Dhanya"];
-  const ELL = ["Sheeba","Treesa","Noel","Ruben"];
-  const HOSTS = ["Krishnan: 4685 Thornberry Hill Ct NE","Krishnan & Priya Home","Liju & Beena Home","Shiju: 1785 Springwind Dr SW","Rakhith: 6254 Vickery Hill Ct SE","Sundar: 1171 Cobblestone way Dr SE","Dony: 4855 E. Meadows Court SE","Prince: 7215 Thornapple Hollow Dr SE","Mahesh: 3315 Falcon Ridge CT NE","West Michigan Hindu Temple","Zoom"];
+  const DEFAULT_ROLES = {'Beena L':'Chenda','Beena C':'Ellathalam','Sheeba V':'Ellathalam','Sheeba E':'Veekan','Noel':'Ellathalam'};
+  const HOSTS = ["Krishnan: 4685 Thornberry Hill Ct NE","Krishnan & Priya Home","Liju & Beena Home","Shiju: 1785 Springwind Dr SW","Rakhith: 6254 Vickery Hill Ct SE","Sundar: 1171 Cobblestone way Dr SE","Dony: 4855 E. Meadows Court SE","Prince: 7215 Thornapple Hollow Dr SE","Mahesh: 3315 Falcon Ridge CT NE","West Michigan Hindu Temple","East Elementary School: 3413 30th St SW, Grandville, MI 49418","Zoom"];
   const METHODS = ["Cash","Zelle","Venmo","Check","Other"];
   const TYPES = {
     payment:{label:'Member payment', short:'Member', dir:'in', who:{mode:'member',label:'Member'}, what:{label:'For',opts:['Monthly dues','Instrument fund','Event','Donation']}},
@@ -399,17 +403,34 @@ function doPost(e) {
   let queue = store.get('queue', []);
   let cfg = store.get('cfg', {url:'https://script.google.com/macros/s/AKfycbzmNyLlAsct-f4weyhsWCrC3POszCjAvFlC91nCoL-5ejcFzj_Bx_iuL7tijUI0xUFN/exec',key:'chenda-team',sheetUrl:''});
   const migratedExtras = store.get('extraMembers', []);
-  const defaultMembers = [...ACTIVE, ...migratedExtras.filter(n=>!ACTIVE.includes(n)&&!OLD.includes(n))].map(name=>({name,role:ELL.includes(name)?'Ellathalam':'Member'}));
+  const defaultMembers = [
+    ...ACTIVE.map(name=>({name,role:DEFAULT_ROLES[name]||'Chenda',status:'Current'})),
+    {name:'Rakhith',role:'Member',status:'Former'},
+    {name:'Ruben',role:'Ellathalam',status:'Former'},
+    ...migratedExtras.filter(n=>!ACTIVE.includes(n)&&!OLD.includes(n)&&!['Rakhith','Ruben'].includes(n)).map(name=>({name,role:'Chenda',status:'Current'}))
+  ];
+  const legacyNames = {beena:'Beena L',sheeba:'Sheeba V'};
+  const formerNames = new Set(['rakhith','ruben']);
   let teamMembers = store.get('teamMembers', defaultMembers);
-  teamMembers = Array.isArray(teamMembers) ? teamMembers.filter(m=>m&&m.name).map(m=>({name:String(m.name).trim(),role:String(m.role||'Member').trim()})) : defaultMembers;
+  teamMembers = Array.isArray(teamMembers) ? teamMembers.filter(m=>m&&m.name).map(m=>{
+    const oldName=String(m.name).trim(),legacyName=legacyNames[oldName.toLowerCase()],name=legacyName||oldName;
+    const role=oldName.toLowerCase()==='beena'?'Chenda':oldName.toLowerCase()==='sheeba'?'Ellathalam':String(m.role||'Chenda').trim();
+    return {name,role,status:String(m.status||(formerNames.has(name.toLowerCase())?'Former':'Current')),instrument:String(m.instrument||'').trim()};
+  }) : defaultMembers;
+  [['Sheeba E','Veekan'],['Beena C','Ellathalam']].forEach(([name,role])=>{
+    if(!teamMembers.some(m=>m.name.toLowerCase()===name.toLowerCase())) teamMembers.push({name,role,status:'Current'});
+  });
   store.set('teamMembers',teamMembers);
   let syncState = '', syncing = false;
 
   const newId = () => Date.now().toString(36)+Math.random().toString(36).slice(2,6);
   const today = () => { const t=new Date(); return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`; };
   const fmtDate = iso => { if(!iso) return ''; const [y,m,d]=String(iso).slice(0,10).split('-').map(Number); return new Date(y,m-1,d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); };
-  const members = () => teamMembers.map(m=>m.name);
-  const ellMembers = () => teamMembers.filter(m=>String(m.role).toLowerCase().includes('ellathalam')).map(m=>m.name);
+  const isFormer = m => String(m.status||'Current').toLowerCase()==='former';
+  const members = () => teamMembers.filter(m=>!isFormer(m)).map(m=>m.name);
+  const formerMembers = () => teamMembers.filter(isFormer);
+  const earlierMembers = () => [...new Set([...OLD,...formerMembers().map(m=>m.name)])];
+  const paymentMembers = () => [...new Set([...members(),...earlierMembers()])];
   function saveMembers(){ store.set('teamMembers',teamMembers); }
 
   // rows for a type = server data + queued adds - queued deletes
@@ -543,8 +564,8 @@ function doPost(e) {
     const seenWho=[...new Set(rowsOf(type).map(r=>r.who).filter(Boolean))];
     const seenWhat=[...new Set(rowsOf(type).map(r=>r.what).filter(Boolean))];
     let whoHtml='';
-    if(t.who.mode==='member') whoHtml=`<div class="field"><label for="f_who">${t.who.label}</label><select id="f_who" required><option value="">Choose...</option>${members().concat(OLD).map(n=>`<option>${esc(n)}</option>`).join('')}</select></div>`;
-    else if(t.who.mode==='text') whoHtml=`<div class="field"><label for="f_who">${t.who.label}</label><input type="text" id="f_who" list="dl_who" required>${datalist('dl_who',[...t.who.opts,...seenWho])}</div>`;
+    if(t.who.mode==='member') whoHtml=`<div class="field"><label for="f_who">${t.who.label}</label><select id="f_who" required><option value="">Choose...</option>${paymentMembers().map(n=>`<option>${esc(n)}</option>`).join('')}</select></div>`;
+    else if(t.who.mode==='text') whoHtml=`<div class="field"><label for="f_who">${t.who.label}</label><input type="text" id="f_who" list="dl_who" required>${datalist('dl_who',[...t.who.opts,...(type==='pastpay'?formerMembers().map(m=>m.name):[]),...seenWho])}</div>`;
     $(dir+'Form').innerHTML=`
       <div class="field two"><div><label for="f_date">Date</label><input type="date" id="f_date" value="${today()}" required></div>
       <div><label for="f_amt">Amount ($)</label><input type="text" inputmode="decimal" id="f_amt" placeholder="0.00" required></div></div>
@@ -568,7 +589,7 @@ function doPost(e) {
   }
 
   // ---------- practice ----------
-  let pstatus='practice'; const picked=new Set(), pickedEll=new Set();
+  let pstatus='practice'; const picked=new Set();
   const join=a=>a.length<=1?(a[0]||''):a.length===2?a[0]+' & '+a[1]:a.slice(0,-1).join(', ')+', & '+a[a.length-1];
   const to12=t=>{const [H,M]=t.split(':').map(Number);return{h:H%12||12,m:String(M).padStart(2,'0'),ap:H>=12?'PM':'AM'};};
   function range(s,e){ if(!s||!e) return ''; const a=to12(s),b=to12(e); return a.ap===b.ap?`${a.h}:${a.m} to ${b.h}:${b.m} ${b.ap}`:`${a.h}:${a.m} ${a.ap} to ${b.h}:${b.m} ${b.ap}`; }
@@ -577,7 +598,6 @@ function doPost(e) {
   function pattend(){
     if(pstatus==='canceled') return ''; if(pstatus==='noclass') return ploc();
     let s=join([...picked]); if($('benny').checked) s+=(s?' ':'')+'with Benny Chettan';
-    if(pickedEll.size) s+=` (Ellathalam Members: ${join([...pickedEll])})`;
     if($('extra').checked) s+=' (Additional Session)';
     const n=$('notes').value.trim(); if(n) s+=(s?' ':'')+`(${n})`; return s;
   }
@@ -586,10 +606,22 @@ function doPost(e) {
     b.onclick=()=>{ set.has(name)?set.delete(name):set.add(name); b.setAttribute('aria-pressed',set.has(name)); pupdate(); }; return b;
   }
   function renderChips(){
-    const m=$('members'); m.innerHTML=''; members().forEach(n=>m.appendChild(chip(n,picked)));
+    const m=$('members'); m.innerHTML='';
+    const groups=new Map();
+    teamMembers.filter(member=>!isFormer(member)).forEach(member=>{
+      const role=String(member.role||'Member').trim()||'Member',key=role.toLowerCase();
+      if(!groups.has(key)) groups.set(key,{role,names:[]});
+      groups.get(key).names.push(member.name);
+    });
+    [...groups.values()].sort((a,b)=>a.role.localeCompare(b.role)).forEach(group=>{
+      const section=document.createElement('div'); section.className='role-group';
+      const heading=document.createElement('span'); heading.className='role-heading'; heading.textContent=group.role;
+      const options=document.createElement('div'); options.className='role-options';
+      group.names.forEach(name=>options.appendChild(chip(name,picked)));
+      section.append(heading,options); m.appendChild(section);
+    });
     const add=document.createElement('button'); add.type='button'; add.className='chip add'; add.textContent='+ Add'; add.onclick=()=>{ $('newName').value=''; $('dlg').showModal(); $('newName').focus(); }; m.appendChild(add);
-    const o=$('oldMembers'); o.innerHTML=''; OLD.forEach(n=>o.appendChild(chip(n,picked)));
-    const e=$('ell'); e.innerHTML=''; ellMembers().forEach(n=>e.appendChild(chip(n,pickedEll)));
+    const o=$('oldMembers'); o.innerHTML=''; earlierMembers().forEach(n=>o.appendChild(chip(n,picked)));
   }
   function pupdate(){
     $('cnt').textContent=picked.size?`(${picked.size})`:'';
@@ -597,8 +629,13 @@ function doPost(e) {
     $('preview').innerHTML=`<b>Practice Date &amp; Time</b>${esc(w)||'—'}<b>Location</b>${esc(l)||'—'}<b>Attendance</b>${esc(a)||'—'}`;
     $('psave').disabled=!(w&&(pstatus!=='practice'||(l&&picked.size)));
   }
-  HOSTS.forEach(h=>{const o=document.createElement('option');o.value=h;o.textContent=h;$('loc').appendChild(o);});
-  {const o=document.createElement('option');o.value='__other';o.textContent='Other...';$('loc').appendChild(o);}
+  function renderLocations(){
+    const select=$('loc'), selected=select.value;
+    const saved=rowsOf('practice').filter(r=>r.status==='practice').map(r=>String(r.location||'').trim()).filter(Boolean);
+    const locations=[...new Set([...HOSTS,...saved])];
+    select.innerHTML=locations.map(h=>`<option value="${esc(h)}">${esc(h)}</option>`).join('')+'<option value="__other">Other...</option>';
+    select.value=locations.includes(selected)||selected==='__other'?selected:(locations[0]||'__other');
+  }
   $('loc').onchange=()=>{ $('locOtherWrap').classList.toggle('hide',$('loc').value!=='__other'); pupdate(); };
   $('pStatus').querySelectorAll('button').forEach(b=>b.onclick=()=>{
     pstatus=b.dataset.v; $('pStatus').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));
@@ -609,8 +646,8 @@ function doPost(e) {
   $('dlg').addEventListener('close',()=>{
     if($('dlg').returnValue!=='ok') return; const n=$('newName').value.trim().replace(/\s+/g,' '); if(!n) return;
     const name=n.charAt(0).toUpperCase()+n.slice(1);
-    if(!members().some(x=>x.toLowerCase()===name.toLowerCase())&&!OLD.some(x=>x.toLowerCase()===name.toLowerCase())){
-      teamMembers.push({name,role:'Member'}); saveMembers();
+    if(!members().some(x=>x.toLowerCase()===name.toLowerCase())&&!earlierMembers().some(x=>x.toLowerCase()===name.toLowerCase())){
+      teamMembers.push({name,role:'Chenda'}); saveMembers();
     }
     picked.add(name); renderMembers(); renderChips(); renderMoney('in'); pupdate();
   });
@@ -620,36 +657,51 @@ function doPost(e) {
     ev.preventDefault();
     const row={id:newId(),dateISO:$('date').value,when:whenText(),location:ploc(),attendance:pattend(),status:pstatus,count:pstatus==='practice'?picked.size:0};
     enqueue({action:'add',type:'practice',row});
-    if(pstatus==='practice'){ picked.clear(); pickedEll.clear(); $('benny').checked=false; $('extra').checked=false; $('notes').value=''; renderChips(); }
+    if(pstatus==='practice'&&$('loc').value==='__other'){ $('loc').value=row.location; $('locOtherWrap').classList.add('hide'); }
+    if(pstatus==='practice'){ picked.clear(); $('benny').checked=false; $('extra').checked=false; $('notes').value=''; renderChips(); }
     pupdate(); const m=$('pmsg'); m.textContent='Saved.'; m.className='msg ok';
   });
   function renderPractice(){
+    renderLocations();
     const rows=rowsOf('practice');
     $('pList').innerHTML=rows.length?rows.slice(0,25).map(r=>`<li><span>${esc(r.when)}${r._pending?'<span class="tag">unsent</span>':''}</span><span class="a">${r.status==='practice'?r.count+' came':esc(r.status==='canceled'?'Canceled':'No class')}</span><span class="s">${esc(r.location)}${r.attendance&&r.status==='practice'?' · '+esc(r.attendance):''}</span><span class="x"><button class="link del" data-id="${esc(r.id)}" type="button">Delete</button></span></li>`).join(''):'<li><p class="empty">No practices logged yet.</p></li>';
     $('pList').querySelectorAll('.del').forEach(b=>b.onclick=()=>removeRow('practice',b.dataset.id));
-    const names=[...members(),...OLD], counts={}; const held=rows.filter(r=>r.status==='practice');
-    names.forEach(n=>{ const re=new RegExp('\\b'+n.replace(/[.*+?^${}()|[\]\\]/g,'\\\\$&')+'\\b'); const c=held.filter(r=>re.test(r.attendance||'')).length; if(c) counts[n]=c; });
+    const names=[...members(),...formerMembers().map(m=>m.name),...OLD], counts={}; const held=rows.filter(r=>r.status==='practice');
+    const aliases={'Beena L':['Beena'],'Sheeba V':['Sheeba']};
+    const attendanceHasName=(text,name)=>` ${String(text||'').toLowerCase().replace(/[^a-z0-9]+/g,' ')} `.includes(` ${name.toLowerCase()} `);
+    names.forEach(n=>{
+      const candidates=[n,...(aliases[n]||[])];
+      const c=held.filter(r=>candidates.some(candidate=>attendanceHasName(r.attendance,candidate))).length;
+      if(c) counts[n]=c;
+    });
     const ks=Object.keys(counts).sort((a,b)=>counts[b]-counts[a]);
     $('attend').innerHTML=ks.length?ks.map(n=>`<li><span>${esc(n)}</span><span class="a">${counts[n]} of ${held.length}</span></li>`).join(''):'<li><p class="empty">Attendance counts appear after you log practices.</p></li>';
   }
 
   // ---------- members ----------
+  function setMemberRole(value){
+    const select=$('memberRole'),role=String(value||'Chenda');
+    select.querySelectorAll('[data-saved-role]').forEach(option=>option.remove());
+    if(![...select.options].some(option=>option.value===role)){
+      const option=document.createElement('option'); option.value=role; option.textContent=`${role} (saved)`; option.dataset.savedRole='true'; select.appendChild(option);
+    }
+    select.value=role;
+  }
   function resetMemberForm(){
-    $('memberEditIndex').value=''; $('memberName').value=''; $('memberRole').value='Member';
+    $('memberEditIndex').value=''; $('memberName').value=''; setMemberRole('Chenda'); $('memberStatus').value='Current'; $('instrumentName').value='';
     $('memberFormTitle').textContent='Add team member'; $('memberSave').textContent='Add member';
     $('memberCancelWrap').classList.add('hide'); $('memberMsg').textContent=''; $('memberMsg').className='msg';
   }
   function refreshMemberUses(){
     const valid=new Set(members());
     [...picked].forEach(n=>{ if(!valid.has(n)) picked.delete(n); });
-    [...pickedEll].forEach(n=>{ if(!ellMembers().includes(n)) pickedEll.delete(n); });
     renderChips(); renderMoney('in'); renderPractice(); pupdate();
   }
   function renderMembers(){
-    $('memberCount').textContent=`(${teamMembers.length})`;
-    $('memberList').innerHTML=teamMembers.length?teamMembers.map((m,i)=>`<li><span>${esc(m.name)}</span><span class="member-role">${esc(m.role||'Member')}</span><span class="member-actions"><button class="link edit-member" data-i="${i}" type="button">Edit</button><button class="link del delete-member" data-i="${i}" type="button">Delete</button></span></li>`).join(''):'<li><p class="empty">No members yet.</p></li>';
+    $('memberCount').textContent=`(${members().length} current, ${formerMembers().length} former)`;
+    $('memberList').innerHTML=teamMembers.length?teamMembers.map((m,i)=>`<li><span>${esc(m.name)}</span><span class="member-role">${esc(m.role||'Chenda')} · ${isFormer(m)?'Former':'Current'}</span>${m.instrument?`<span class="member-instrument">Instrument: ${esc(m.instrument)}</span>`:''}<span class="member-actions"><button class="link edit-member" data-i="${i}" type="button">Edit</button><button class="link del delete-member" data-i="${i}" type="button">Delete</button></span></li>`).join(''):'<li><p class="empty">No members yet.</p></li>';
     $('memberList').querySelectorAll('.edit-member').forEach(b=>b.onclick=()=>{
-      const i=Number(b.dataset.i),m=teamMembers[i]; $('memberEditIndex').value=String(i); $('memberName').value=m.name; $('memberRole').value=m.role||'Member';
+      const i=Number(b.dataset.i),m=teamMembers[i]; $('memberEditIndex').value=String(i); $('memberName').value=m.name; setMemberRole(m.role||'Chenda'); $('memberStatus').value=isFormer(m)?'Former':'Current'; $('instrumentName').value=m.instrument||'';
       $('memberFormTitle').textContent='Update team member'; $('memberSave').textContent='Save changes'; $('memberCancelWrap').classList.remove('hide');
       $('memberName').focus(); window.scrollTo(0,0);
     });
@@ -659,11 +711,11 @@ function doPost(e) {
     });
   }
   $('memberForm').onsubmit=ev=>{
-    ev.preventDefault(); const name=$('memberName').value.trim().replace(/\s+/g,' '),role=$('memberRole').value.trim().replace(/\s+/g,' ')||'Member';
+    ev.preventDefault(); const name=$('memberName').value.trim().replace(/\s+/g,' '),role=$('memberRole').value,status=$('memberStatus').value,instrument=$('instrumentName').value.trim();
     const edit=$('memberEditIndex').value,duplicate=teamMembers.findIndex((m,i)=>m.name.toLowerCase()===name.toLowerCase()&&(edit===''||i!==Number(edit)));
     if(!name){ $('memberMsg').textContent='Enter a member name.'; $('memberMsg').className='msg err'; return; }
     if(duplicate>-1){ $('memberMsg').textContent='That member already exists.'; $('memberMsg').className='msg err'; return; }
-    if(edit==='') teamMembers.push({name,role}); else teamMembers[Number(edit)]={name,role};
+    if(edit==='') teamMembers.push({name,role,status,instrument}); else teamMembers[Number(edit)]={name,role,status,instrument};
     saveMembers(); resetMemberForm(); renderMembers(); refreshMemberUses();
     $('memberMsg').textContent=edit===''?'Member added.':'Member updated.'; $('memberMsg').className='msg ok';
   };
