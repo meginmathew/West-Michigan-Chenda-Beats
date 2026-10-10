@@ -80,6 +80,24 @@ details summary{cursor:pointer;font-weight:600}
 details p,details ol{font-size:14px;color:var(--muted)}
 pre{background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:12px;overflow-x:auto;font-size:12px;max-height:260px}
 .hide{display:none!important}
+body:not(.authenticated)>main,body:not(.authenticated)>nav{display:none}
+#loginGate{position:fixed;inset:0;z-index:10;display:grid;place-items:center;padding:24px;background:var(--bg)}
+.login-card{width:min(100%,420px);padding:30px;background:var(--panel);border:1px solid var(--line);border-radius:20px;box-shadow:0 20px 60px rgba(23,35,31,.12)}
+.login-brand{display:flex;align-items:center;gap:12px;margin-bottom:26px}
+.login-mark{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;background:var(--green);color:var(--green-ink);font-family:var(--serif);font-size:26px;font-weight:600}
+.login-brand strong{display:block;font-size:17px}.login-brand span{display:block;color:var(--muted);font-size:13px}
+.login-card h2{font-size:28px;letter-spacing:-.03em;margin:0 0 5px}
+.login-intro{margin:0 0 22px;color:var(--muted);font-size:14px}
+.login-card .field{margin-bottom:16px}
+.password-input{display:flex;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.login-card input[type=password],.login-card input[type=text]{flex:1;min-width:0;font:inherit;color:var(--ink);background:transparent;border:0;padding:12px;min-height:48px;outline:0}
+.login-card input[type=password]:focus-visible,.login-card input[type=text]:focus-visible{outline:0}
+.password-input:focus-within{outline:3px solid var(--gold);outline-offset:2px}
+.password-toggle{align-self:stretch;padding:0 13px;border:0;background:transparent;color:var(--green);font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.login-card .save{margin-top:4px}
+.login-foot{margin:16px 0 0;text-align:center;color:var(--muted);font-size:12px}
+.header-actions{display:flex;align-items:center;gap:10px}
+#logout{font:inherit;font-size:13px;color:var(--muted);background:none;border:0;text-decoration:underline;padding:7px 0;cursor:pointer}
 nav{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);
   padding:6px 8px calc(env(safe-area-inset-bottom,0px) + 6px)}
 nav button{font:inherit;font-size:13px;font-weight:600;background:none;border:0;color:var(--muted);padding:10px 4px;cursor:pointer;border-radius:10px;border-top:3px solid transparent}
@@ -92,10 +110,21 @@ dialog .actions button.go{background:var(--green);color:var(--green-ink);border-
 </style>
 </head>
 <body>
+<div id="loginGate">
+  <form class="login-card" id="loginForm" autocomplete="on">
+    <div class="login-brand"><div class="login-mark" aria-hidden="true">ച</div><div><strong>Chenda Team</strong><span>Grand Rapids</span></div></div>
+    <h2>Welcome back</h2>
+    <p class="login-intro">Sign in with your team's shared access key to continue.</p>
+    <div class="field"><label for="accessKey">Team access key</label><div class="password-input"><input type="password" id="accessKey" name="password" autocomplete="current-password" required autofocus><button class="password-toggle" id="toggleAccessKey" type="button" aria-label="Show access key" aria-pressed="false">Show</button></div></div>
+    <button class="save" id="loginButton" type="submit">Sign in</button>
+    <p class="msg" id="loginMsg" role="status" aria-live="polite"></p>
+    <p class="login-foot">Use the key configured in your Google Apps Script.</p>
+  </form>
+</div>
 <main>
 <header>
   <div><h1>Chenda Team</h1><p>Grand Rapids</p></div>
-  <button id="pill" type="button">Set up</button>
+  <div class="header-actions"><button id="pill" type="button">Set up</button><button id="logout" type="button">Sign out</button></div>
 </header>
 
 <!-- BALANCE -->
@@ -225,7 +254,7 @@ dialog .actions button.go{background:var(--green);color:var(--green-ink);border-
 <script type="text/plain" id="gs">
 // Chenda Team backend: stores everything in one Google Sheet in your Drive.
 // The sheet (with all tabs) is created automatically on first use.
-const SECRET = 'chenda-melam';   // must match the Secret key in the app
+const SECRET = 'chenda-team';   // must match the Secret key in the app
 const FILE_NAME = 'Grand Rapids Chenda Team - Data';
 
 function money_(who, what) {
@@ -368,7 +397,7 @@ function doPost(e) {
   const empty = () => Object.fromEntries(ALL.map(k=>[k,[]]));
   let data = Object.assign(empty(), store.get('data', {}));
   let queue = store.get('queue', []);
-  let cfg = store.get('cfg', {url:'https://script.google.com/macros/s/AKfycbzmNyLlAsct-f4weyhsWCrC3POszCjAvFlC91nCoL-5ejcFzj_Bx_iuL7tijUI0xUFN/exec',key:'chenda-melam',sheetUrl:''});
+  let cfg = store.get('cfg', {url:'https://script.google.com/macros/s/AKfycbzmNyLlAsct-f4weyhsWCrC3POszCjAvFlC91nCoL-5ejcFzj_Bx_iuL7tijUI0xUFN/exec',key:'chenda-team',sheetUrl:''});
   const migratedExtras = store.get('extraMembers', []);
   const defaultMembers = [...ACTIVE, ...migratedExtras.filter(n=>!ACTIVE.includes(n)&&!OLD.includes(n))].map(name=>({name,role:ELL.includes(name)?'Ellathalam':'Member'}));
   let teamMembers = store.get('teamMembers', defaultMembers);
@@ -452,6 +481,35 @@ function doPost(e) {
     document.querySelectorAll('#nav button').forEach(b=>{ b.toggleAttribute('aria-current',b.dataset.v===v); if(b.dataset.v===v) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current'); });
     window.scrollTo(0,0);
   }
+  $('loginForm').addEventListener('submit',async ev=>{
+    ev.preventDefault();
+    const msg=$('loginMsg'),button=$('loginButton'),key=$('accessKey').value.trim();
+    if(!cfg.url){ msg.textContent='Connection is not configured yet. Ask your team administrator to finish setup.'; msg.className='msg err'; return; }
+    button.disabled=true; msg.textContent='Checking access...'; msg.className='msg';
+    try{
+      const response=await fetch(`${cfg.url}${cfg.url.includes('?')?'&':'?'}key=${encodeURIComponent(key)}`);
+      const result=await response.json();
+      if(!result.ok) throw new Error('That access key was not accepted. Try again.');
+      cfg.key=key; store.set('cfg',cfg);
+      document.body.classList.add('authenticated'); $('loginGate').classList.add('hide');
+      msg.textContent=''; $('accessKey').value='';
+      await pull();
+    }catch(error){
+      msg.textContent=error instanceof TypeError?'Could not reach the team service. Check your connection and try again.':error.message;
+      msg.className='msg err';
+    }finally{ button.disabled=false; }
+  });
+  $('logout').onclick=()=>{
+    document.body.classList.remove('authenticated'); $('loginGate').classList.remove('hide');
+    cfg={...cfg,key:''}; store.set('cfg',cfg);
+    $('accessKey').value=''; $('loginMsg').textContent=''; $('loginMsg').className='msg'; $('accessKey').focus();
+  };
+  $('toggleAccessKey').onclick=()=>{
+    const input=$('accessKey'),button=$('toggleAccessKey'),visible=input.type==='password';
+    input.type=visible?'text':'password'; button.textContent=visible?'Hide':'Show';
+    button.setAttribute('aria-label',visible?'Hide access key':'Show access key');
+    button.setAttribute('aria-pressed',String(visible)); input.focus();
+  };
   document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>show(b.dataset.v));
   $('pill').onclick=()=>{ if(!cfg.url) show('setup'); else if(syncState==='error'&&!queue.length) show('setup'); else pull(); };
   $('toSetup').onclick=()=>show('setup');
